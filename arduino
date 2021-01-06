@@ -1,0 +1,89 @@
+
+const int trigPin = 9;//测距装置发出信号
+const int echoPin = 10;//测距装置接受信号
+
+float cm; 
+
+// 定义变量
+long duration;//声波返回时间
+int distance;//距离
+
+void setup() 
+{
+  Serial.begin(9600); 
+  pinMode(11, OUTPUT);  //发红色光
+  pinMode(12, OUTPUT);  //发蓝色光
+  pinMode(trigPin, OUTPUT);   // 发出测距信号为输出
+  pinMode(6, OUTPUT);   //振动器
+  pinMode(3,OUTPUT);  //蜂鸣器
+  pinMode(echoPin, INPUT);  // 返回距离数据为输入
+}
+void loop() 
+{
+  //向声波发生器传递一个高频信号，在loop中不断循环发声
+
+digitalWrite(trigPin, LOW); 
+
+delayMicroseconds(2); 
+
+digitalWrite(trigPin, HIGH); 
+
+delayMicroseconds(10); 
+
+digitalWrite(trigPin, LOW); 
+
+ 
+
+cm = pulseIn(echoPin, HIGH) / 58.0; //算成厘米 
+
+cm = (int(cm * 100.0)) / 100.0; //保留两位小数 
+
+Serial.print(cm); 
+
+Serial.print("cm"); 
+
+Serial.println(); 
+
+delay(1000); 
+
+ 
+
+  // 返回声波传输时间
+  duration = pulseIn(echoPin, HIGH);
+
+  // 计算距离
+  distance= duration*0.034/2;
+ 
+
+  if(cm<25)//当距离小于25
+  {
+    Serial.print("warning"); //强烈警报
+    digitalWrite(11,HIGH); digitalWrite(12,LOW); 
+    analogWrite(6,140); //振动器剧烈振动
+    tone(3,1000,1000);//蜂鸣器发声
+  }
+  else if(cm<50)//当距离小于50
+  {
+    Serial.print("narrow");//警报
+    digitalWrite(11,HIGH); digitalWrite(12,LOW);
+     analogWrite(6,90); //振动器振动
+    tone(3,1000,1000);//蜂鸣器发声
+  }
+  else if(cm<100)//小于100
+  {
+    Serial.print("OK");//准备警报
+    digitalWrite(11,LOW); digitalWrite(12,LOW); //不亮灯
+      analogWrite(6,60);//轻微振动
+    analogWrite(3,255);//蜂鸣器轻微响声
+  }
+  else
+  {
+    Serial.print("safe");//安全
+    digitalWrite(11,LOW); digitalWrite(12,LOW); 
+    analogWrite(6,0);
+    analogWrite(3,0);
+    noTone(3); 
+  }
+ 
+
+
